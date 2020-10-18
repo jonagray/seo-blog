@@ -1,4 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document';
+// import "nprogress/nprogress.css";
 
 class MyDocument extends Document {
   render() {
@@ -11,6 +12,9 @@ class MyDocument extends Document {
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
           />
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
+          <link rel="stylesheet" href="/static/css/styles.css" />
+
         </Head>
         <body>
           <Main />
