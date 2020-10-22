@@ -39,22 +39,31 @@ const Header = () => {
 
   return (
     <div>
-      <Navbar color="light" light expand="md">
+      {process.browser && <Navbar color="light" light expand="md">
         <Link href="/">
           <NavLink style={{ cursor: 'pointer' }} className="font-weight-bold">{APP_NAME}</NavLink>
         </Link>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav className="ml-auto" navbar>
+
+            <React.Fragment>
+              <NavItem>
+                <Link href="/blogs">
+                  <NavLink style={{ cursor: 'pointer' }}>Blogs</NavLink>
+                </Link>
+              </NavItem>
+            </React.Fragment>
+
             {!isAuth() && (
               <React.Fragment>
                 <NavItem>
-                  <Link href="/signin">
+                  <Link a href="/signin">
                     <NavLink style={{ cursor: 'pointer' }}>Signin</NavLink>
                   </Link>
                 </NavItem>
                 <NavItem>
-                  <Link href="/signup">
+                  <Link a href="/signup">
                     <NavLink style={{ cursor: 'pointer' }}>Signup</NavLink>
                   </Link>
                 </NavItem>
@@ -91,7 +100,7 @@ const Header = () => {
 
           </Nav>
         </Collapse>
-      </Navbar>
+      </Navbar>}
     </div>
   );
 };
