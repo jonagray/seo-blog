@@ -18,7 +18,8 @@ export const createBlog = (blog, token) => {
 
 export const listBlogsWithCategoriesAndTags = (skip, limit) => {
     const data = {
-        limit, skip
+        limit,
+        skip
     };
     return fetch(`${API}/blogs-categories-tags`, {
         method: 'POST',
@@ -38,13 +39,13 @@ export const singleBlog = slug => {
     return fetch(`${API}/blog/${slug}`, {
         method: 'GET'
     })
-    .then(response => {
-        return response.json();
-    })
-    .catch(err => console.log(err));
+        .then(response => {
+            return response.json();
+        })
+        .catch(err => console.log(err));
 };
 
-export const listRelated = (blog) => {
+export const listRelated = blog => {
     return fetch(`${API}/blogs/related`, {
         method: 'POST',
         headers: {
@@ -63,10 +64,10 @@ export const list = () => {
     return fetch(`${API}/blogs`, {
         method: 'GET'
     })
-    .then(response => {
-        return response.json();
-    })
-    .catch(err => console.log(err));
+        .then(response => {
+            return response.json();
+        })
+        .catch(err => console.log(err));
 };
 
 export const removeBlog = (slug, token) => {
@@ -76,7 +77,7 @@ export const removeBlog = (slug, token) => {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
-        },
+        }
     })
         .then(response => {
             return response.json();
