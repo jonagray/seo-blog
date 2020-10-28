@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownItem
 } from 'reactstrap';
+import Search from './blog/Search';
 
 Router.onRouteChangeStart = () => {
   NProgress.start();
@@ -38,7 +39,7 @@ const Header = () => {
   };
 
   return (
-    <div>
+    <React.Fragment>
       {process.browser && <Navbar color="light" light expand="md">
         <Link href="/">
           <NavLink style={{ cursor: 'pointer' }} className="font-weight-bold">{APP_NAME}</NavLink>
@@ -101,7 +102,8 @@ const Header = () => {
           </Nav>
         </Collapse>
       </Navbar>}
-    </div>
+      <Search />
+    </React.Fragment>
   );
 };
 
