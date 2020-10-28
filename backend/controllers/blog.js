@@ -53,7 +53,7 @@ exports.create = (req, res) => {
         blog.mtitle = `${title} | ${process.env.APP_NAME}`;
         blog.mdesc = stripHtml(body.substring(0, 160));
         blog.postedBy = req.auth._id;
-        
+
         // categories and tags
         let arrayOfCategories = categories && categories.split(',');
         let arrayOfTags = tags && tags.split(',');
@@ -77,7 +77,7 @@ exports.create = (req, res) => {
             // res.json(result);
             Blog.findByIdAndUpdate(result._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec(
                 (err, result) => {
-                  console.log(result)
+                    console.log(result)
                     if (err) {
                         return res.status(400).json({
                             error: errorHandler(err)
@@ -276,18 +276,35 @@ exports.photo = (req, res) => {
 
 exports.listRelated = (req, res) => {
     let limit = req.body.limit ? parseInt(req.body.limit) : 3;
-    const {_id, categories} = req.body.blog;
+    const { _id, categories } = req.body.blog;
 
-    Blog.find({_id: {$ne: _id}, categories: {$in: categories}})
-    .limit(limit)
-    .populate('postedBy', '_id name profile')
-    .select('title slug excerpt postedBy createdAt updatedAt')
-    .exec((err, blogs) => {
-        if (err) {
-            return res.status(400).json({
-                error: 'Blogs not found'
-            });
-        }
-        res.json(blogs);
-    });
+    Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
+        .limit(limit)
+        .populate('postedBy', '_id name profile')
+        .select('title slug excerpt postedBy createdAt updatedAt')
+        .exec((err, blogs) => {
+            if (err) {
+                return res.status(400).json({
+                    error: 'Blogs not found'
+                });
+            }
+            res.json(blogs);
+        });
+};
+
+exports.listSearch = (req, res) => {
+    console.log(req.query);
+    const { search } = req.query;
+    if (search) {
+        Blog.find({
+            $or: [{ title: { $regex: search, $options: 'i' } }, { body: { $regex: search, $options: 'i' } }]
+        }, (err, blogs) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err)
+                })
+            }
+            res.json(blogs)
+        }).select('-photo -body');
+    }
 };
