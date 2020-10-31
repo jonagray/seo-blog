@@ -52,8 +52,7 @@ exports.create = (req, res) => {
         blog.slug = slugify(title).toLowerCase();
         blog.mtitle = `${title} | ${process.env.APP_NAME}`;
         blog.mdesc = stripHtml(body.substring(0, 160));
-        blog.postedBy = req.auth._id;
-
+        blog.postedBy = req.user._id;
         // categories and tags
         let arrayOfCategories = categories && categories.split(',');
         let arrayOfTags = tags && tags.split(',');
@@ -77,7 +76,6 @@ exports.create = (req, res) => {
             // res.json(result);
             Blog.findByIdAndUpdate(result._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec(
                 (err, result) => {
-                    console.log(result)
                     if (err) {
                         return res.status(400).json({
                             error: errorHandler(err)
@@ -275,12 +273,13 @@ exports.photo = (req, res) => {
 };
 
 exports.listRelated = (req, res) => {
+    // console.log(req.body.blog);
     let limit = req.body.limit ? parseInt(req.body.limit) : 3;
     const { _id, categories } = req.body.blog;
 
     Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
         .limit(limit)
-        .populate('postedBy', '_id name profile')
+        .populate('postedBy', '_id name username profile')
         .select('title slug excerpt postedBy createdAt updatedAt')
         .exec((err, blogs) => {
             if (err) {
@@ -292,19 +291,23 @@ exports.listRelated = (req, res) => {
         });
 };
 
+//
 exports.listSearch = (req, res) => {
     console.log(req.query);
     const { search } = req.query;
     if (search) {
-        Blog.find({
-            $or: [{ title: { $regex: search, $options: 'i' } }, { body: { $regex: search, $options: 'i' } }]
-        }, (err, blogs) => {
-            if (err) {
-                return res.status(400).json({
-                    error: errorHandler(err)
-                })
+        Blog.find(
+            {
+                $or: [{ title: { $regex: search, $options: 'i' } }, { body: { $regex: search, $options: 'i' } }]
+            },
+            (err, blogs) => {
+                if (err) {
+                    return res.status(400).json({
+                        error: errorHandler(err)
+                    });
+                }
+                res.json(blogs);
             }
-            res.json(blogs)
-        }).select('-photo -body');
+        ).select('-photo -body');
     }
 };
