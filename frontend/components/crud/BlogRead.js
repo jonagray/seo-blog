@@ -5,7 +5,7 @@ import { getCookie, isAuth } from '../../actions/auth';
 import { list, removeBlog } from '../../actions/blog';
 import moment from 'moment';
 
-const BlogRead = () => {
+const BlogRead = ({username}) => {
   const [blogs, setBlogs] = useState([]);
   const [message, setMessage] = useState('');
   const token = getCookie('token');
@@ -15,14 +15,14 @@ const BlogRead = () => {
   }, []);
 
   const loadBlogs = () => {
-    list().then(data => {
-      if (data.error) {
-        console.log(data.error)
-      } else {
-        setBlogs(data);
-      }
+    list(username).then(data => {
+        if (data.error) {
+            console.log(data.error);
+        } else {
+            setBlogs(data);
+        }
     });
-  };
+};
 
   const deleteBlog = (slug) => {
     removeBlog(slug, token).then(data => {
@@ -46,7 +46,7 @@ const BlogRead = () => {
     if (isAuth() && isAuth().role === 0) {
       return (
         <Link href={`/user/crud/${blog.slug}`}>
-          <a className="btn btn-sm btn-warning">Update</a>
+          <a className="ml-2 btn btn-sm btn-warning">Update</a>
         </Link>
       );
     } else if (isAuth() && isAuth().role === 1) {
@@ -60,20 +60,20 @@ const BlogRead = () => {
 
   const showAllBlogs = () => {
     return blogs.map((blog, i) => {
-      return (
-        <div key={i} className="pb-5">
-          <h3>{blog.title}</h3>
-          <p className="mark">
-            Written by {blog.postedBy.name} | Published on {moment(blog.updatedAt).fromNow()}
-          </p>
-          <button className="btn btn-sm btn-danger" onClick={() => deleteConfirm(blog.slug)}>
-            Delete
+        return (
+            <div key={i} className="pb-5">
+                <h3>{blog.title}</h3>
+                <p className="mark">
+                    Written by {blog.postedBy.name} | Published on {moment(blog.updatedAt).fromNow()}
+                </p>
+                <button className="btn btn-sm btn-danger" onClick={() => deleteConfirm(blog.slug)}>
+                    Delete
                 </button>
-          {showUpdateButton(blog)}
-        </div>
-      );
+                {showUpdateButton(blog)}
+            </div>
+        );
     });
-  };
+};
 
   return (
     <React.Fragment>

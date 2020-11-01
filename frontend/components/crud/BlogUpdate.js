@@ -25,7 +25,7 @@ const BlogUpdate = ({ router }) => {
         title: '',
         error: '',
         success: '',
-        formData: '', // or new FormData()
+        formData: process.browser && new FormData(), // or new FormData()
         title: '',
         body: ''
     });
