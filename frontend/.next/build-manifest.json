@@ -29,20 +29,20 @@
       "static/chunks/webpack.js",
       "static/chunks/pages/blogs.js"
     ],
+    "/blogs/[slug]": [
+      "static/chunks/main.js",
+      "static/chunks/webpack.js",
+      "static/chunks/pages/blogs/[slug].js"
+    ],
+    "/signin": [
+      "static/chunks/main.js",
+      "static/chunks/webpack.js",
+      "static/chunks/pages/signin.js"
+    ],
     "/user": [
       "static/chunks/main.js",
       "static/chunks/webpack.js",
       "static/chunks/pages/user.js"
-    ],
-    "/user/crud/[slug]": [
-      "static/chunks/main.js",
-      "static/chunks/webpack.js",
-      "static/chunks/pages/user/crud/[slug].js"
-    ],
-    "/user/crud/blogs": [
-      "static/chunks/main.js",
-      "static/chunks/webpack.js",
-      "static/chunks/pages/user/crud/blogs.js"
     ]
   },
   "ampFirstPages": []
