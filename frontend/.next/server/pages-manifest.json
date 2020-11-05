@@ -2,6 +2,9 @@
   "/_document": "pages/_document.js",
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/": "pages/index.js",
-  "/contact": "pages/contact.js"
+  "/user/crud/blog": "pages/user/crud/blog.js",
+  "/contact": "pages/contact.js",
+  "/profile/[username]": "pages/profile/[username].js",
+  "/blogs": "pages/blogs.js",
+  "/admin": "pages/admin.js"
 }
