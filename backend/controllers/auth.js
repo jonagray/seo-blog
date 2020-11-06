@@ -7,32 +7,65 @@ const _ = require('lodash');
 const { errorHandler } = require('../helpers/dbErrorHandler');
 const { sendEmailWithNodemailer } = require("../helpers/email");
 
-exports.signup = (req, res) => {
-  User.findOne({ email: req.body.email }).exec((err, user) => {
+exports.preSignup = (req, res) => {
+  const { name, email, password } = req.body;
+  User.findOne({ email: email.toLowerCase() }, (err, user) => {
     if (user) {
       return res.status(400).json({
-        error: 'Email is already in use'
+        error: 'Email is taken'
       })
     }
+    const token = jwt.sign({ name, email, password }, process.env.JWT_ACCOUNT_ACTIVATION, { expiresIn: '10m' });
 
-    const { name, email, password } = req.body;
-    let username = shortId.generate();
-    let profile = `${process.env.CLIENT_URL}/profile/${username}`;
-    let newUser = new User({ name, email, password, profile, username });
-    newUser.save((err, success) => {
-      if (err) {
-        return res.status(400).json({
-          error: err
-        })
-      }
-      // res.json({
-      //   user: success
-      // });
-      res.json({
-        message: 'Signup success! Please sign in.'
-      });
+    const emailData = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: `Account activation link`,
+      html: `
+      <p>Please use the following link to activate your account:</p>
+      <p>${process.env.CLIENT_URL}/auth/account/activate/${token}</p>
+      <hr />
+  `
+    };
+
+    sendEmailWithNodemailer(req, res, emailData);
+    return res.json({
+      message: `Email has been sent to ${email}. Follow the instructions to activate your account. Link expires in 10 minutes.`
     });
   });
+};
+
+exports.signup = (req, res) => {
+  const token = req.body.token;
+  if (token) {
+    jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (err, decoded) {
+      if (err) {
+        return res.status(401).json({
+          error: 'Expired link. Signup again'
+        })
+      }
+      const { name, email, password } = jwt.decode(token);
+
+      let username = shortId.generate();
+      let profile = `${process.env.CLIENT_URL}/profile/${username}`;
+
+      const user = new User({name, email, password, profile, username});
+      user.save((err, user) => {
+        if (err) {
+          return res.status(401).json({
+            error: errorHandler(err)
+          });
+        }
+        return res.json({
+          message: `Signup success! Please signin`
+        })
+      });
+    });
+  } else {
+    return res.status(401).json({
+      error: 'Something went wrong. Please try again'
+    })
+  }
 };
 
 exports.signin = (req, res) => {
@@ -128,91 +161,54 @@ exports.canUpdateDeleteBlog = (req, res, next) => {
   });
 };
 
-// exports.forgotPassword = (req, res) => {
-//   const { email } = req.body;
-//   User.findOne({ email }, (err, user) => {
-//     if (err || !user) {
-//       return res.status(401).json({
-//         error: 'User with that email does not exist'
-//       });
-//     }
-//     const token = jwt.sign({ _id: user._id }, process.env.JWT_RESET_PASSWORD, { expiresIn: '10m' });
-
-//     // email
-//     const emailData = {
-//       from: process.env.EMAIL_FROM,
-//       to: email,
-//       subject: `Password reset link`,
-//       html: `
-//           <p>Please use the following link to reset your password:</p>
-//           <p>${process.env.CLIENT_URL}/auth/password/reset/${token}</p>
-//           <hr />
-//       `,
-//     };
-
-
-//     //populate db
-//     return user.updateOne({ resetPasswordLink: token }, (err, success) => {
-//       if (err) {
-//         return res.json({ error: errorHandler(err) })
-//       } else {
-//         sendEmailWithNodemailer(req, res, emailData);
-//       }
-//       return res.json({
-//         message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10 minutes.`
-//       })
-//     })
-//   })
-// };
-
 exports.forgotPassword = (req, res) => {
   const { email } = req.body;
 
   User.findOne({ email }, (err, user) => {
-      if (err || !user) {
-          return res.status(401).json({
-              error: 'User with that email does not exist'
-          });
-      }
+    if (err || !user) {
+      return res.status(401).json({
+        error: 'User with that email does not exist'
+      });
+    }
 
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_RESET_PASSWORD, { expiresIn: '10m' });
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_RESET_PASSWORD, { expiresIn: '10m' });
 
-      // email
-      const emailData = {
-          from: process.env.EMAIL_FROM,
-          to: email,
-          subject: `Password reset link`,
-          html: `
+    // email
+    const emailData = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: `Password reset link`,
+      html: `
           <p>Please use the following link to reset your password:</p>
           <p>${process.env.CLIENT_URL}/auth/password/reset/${token}</p>
           <hr />
       `
-      };
-      // populating the db > user > resetPasswordLink
-      return user.updateOne({ resetPasswordLink: token }, (err, success) => {
-          if (err) {
-              return res.json({ error: errorHandler(err) });
-          } else {
-            sendEmailWithNodemailer(req, res, emailData);
-            return res.json({
-                message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10 minutes.`
-              })
-          }
-      });
+    };
+    // populating the db > user > resetPasswordLink
+    return user.updateOne({ resetPasswordLink: token }, (err, success) => {
+      if (err) {
+        return res.json({ error: errorHandler(err) });
+      } else {
+        sendEmailWithNodemailer(req, res, emailData);
+        return res.json({
+          message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10 minutes.`
+        })
+      }
+    });
   });
 };
 
 exports.resetPassword = (req, res) => {
-  const {resetPasswordLink, newPassword} = req.body;
+  const { resetPasswordLink, newPassword } = req.body;
 
   if (resetPasswordLink) {
-    jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function(err, decoded) {
+    jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function (err, decoded) {
       if (err) {
         return res.status(401).json({
           error: 'Expired link. Try again'
         })
       }
-      User.findOne({resetPasswordLink}, (err, user) => {
+      User.findOne({ resetPasswordLink }, (err, user) => {
         if (err || !user) {
           return res.status(401).json({
             error: 'Something went wrong. Please try again later'
