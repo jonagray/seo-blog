@@ -47,8 +47,27 @@ const Header = () => {
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav className="ml-auto" navbar>
-
             <React.Fragment>
+
+              {isAuth() && isAuth().role === 0 && (
+                <NavItem>
+                  <Link href="/user">
+                    <NavLink style={{ cursor: 'pointer' }}>
+                      {`${isAuth().name}'s Dashboard`}
+                    </NavLink>
+                  </Link>
+                </NavItem>
+              )}
+
+              {isAuth() && isAuth().role === 1 && (
+                <NavItem>
+                  <Link href="/admin">
+                    <NavLink style={{ cursor: 'pointer' }}>
+                      {`${isAuth().name}'s Dashboard`}
+                    </NavLink>
+                  </Link>
+                </NavItem>
+              )}
               <NavItem>
                 <Link href="/blogs">
                   <NavLink style={{ cursor: 'pointer' }}>Blogs</NavLink>
@@ -78,25 +97,6 @@ const Header = () => {
               </React.Fragment>
             )}
 
-            {isAuth() && isAuth().role === 0 && (
-              <NavItem>
-                <Link href="/user">
-                  <NavLink style={{ cursor: 'pointer' }}>
-                    {`${isAuth().name}'s Dashboard`}
-                  </NavLink>
-                </Link>
-              </NavItem>
-            )}
-
-            {isAuth() && isAuth().role === 1 && (
-              <NavItem>
-                <Link href="/admin">
-                  <NavLink style={{ cursor: 'pointer' }}>
-                    {`${isAuth().name}'s Dashboard`}
-                  </NavLink>
-                </Link>
-              </NavItem>
-            )}
 
             {isAuth() && (
               <NavItem>
@@ -107,7 +107,7 @@ const Header = () => {
             )}
 
             <NavItem>
-                <a href="/user/crud/blog" className="btn btn-primary text-light" style={{ cursor: 'pointer' }}>Write a blog</a>
+              <a href="/user/crud/blog" className="btn btn-primary text-light" style={{ cursor: 'pointer' }}>New Blog</a>
             </NavItem>
 
           </Nav>
